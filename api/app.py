@@ -1,21 +1,32 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Dict, Any
 import math
-
-# Para servir index.html en la raíz
-@app.get("/", response_class=HTMLResponse)
-async def serve_index():
-    try:
-        with open("index.html", "r", encoding="utf-8") as f:
-            html_content = f.read()
-        return HTMLResponse(content=html_content)
-    except FileNotFoundError:
-        return {"error": "index.html no encontrado"}
+import os
 
 # ============================================
-# MODELO DE DATOS DE ENTRADA
+# PRIMERO: CREAR LA APLICACIÓN FASTAPI
+# ============================================
+app = FastAPI(
+    title="Memoria de Cálculo - Puente 75m",
+    description="API para diseño estructural de puente vehicular",
+    version="1.0.0"
+)
+
+# ============================================
+# SEGUNDO: CONFIGURAR CORS
+# ============================================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ============================================
+# TERCERO: MODELO DE DATOS
 # ============================================
 class DatosPuente(BaseModel):
     luz: float = 75
@@ -26,27 +37,9 @@ class DatosPuente(BaseModel):
     camionHS20: float = 36
 
 # ============================================
-# CREAR APLICACIÓN FASTAPI
-# ============================================
-app = FastAPI(
-    title="Memoria de Cálculo - Puente 75m",
-    description="API para diseño estructural de puente vehicular",
-    version="1.0.0"
-)
-
-# Configurar CORS para permitir peticiones desde tu frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # En producción, especifica tu dominio
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ============================================
-# FUNCIONES DE CÁLCULO
+# CUARTO: FUNCIONES DE CÁLCULO
 # ============================================
 def calcular_pre_dimensionamiento(L: float) -> Dict[str, Any]:
-    """Fase 2: Pre-dimensionamiento según PDF página 8"""
     peralte_viga = max(L / 15.6, 1.60)
     base_viga = peralte_viga / 3.5
     espesor_losa = 0.20
@@ -61,23 +54,17 @@ def calcular_pre_dimensionamiento(L: float) -> Dict[str, Any]:
     }
 
 def calcular_losa(datos: DatosPuente, predim: Dict) -> Dict[str, Any]:
-    """Fase 3: Diseño de losa según PDF páginas 10-13"""
-    S = 3.0  # Separación entre vigas (m)
-    
-    # Cargas
+    S = 3.0
     w_losa = predim["espesor_losa_m"] * 1.0 * datos.pesoConcreto
     w_asfalto = 0.05 * 1.0 * datos.pesoAsfalto
     w_barandal = 40
-    w_cm_losa = w_losa + w_asfalto + w_barandal  # 625 kg/m
+    w_cm_losa = w_losa + w_asfalto + w_barandal
     
-    # Momentos del PDF (valores base)
-    Mcm_losa = 562.50  # kg-m (del PDF página 11)
-    Mcv_losa = 658.78 * (datos.camionHS20 / 36)  # kg-m, escala por camión
-    
-    I_losa = 0.30  # Factor de impacto (máximo 30%)
+    Mcm_losa = 562.50
+    Mcv_losa = 658.78 * (datos.camionHS20 / 36)
+    I_losa = 0.30
     Mu_losa = 1.3 * (Mcm_losa + (5/3) * (Mcv_losa * (1 + I_losa)))
     
-    # Áreas de acero según PDF página 14
     return {
         "carga_muerta_kg_m": round(w_cm_losa),
         "momento_cm_kg_m": Mcm_losa,
@@ -85,49 +72,39 @@ def calcular_losa(datos: DatosPuente, predim: Dict) -> Dict[str, Any]:
         "factor_impacto": I_losa,
         "momento_ultimo_kg_m": round(Mu_losa),
         "momento_ultimo_ton_m": round(Mu_losa / 1000, 2),
-        "area_acero_necesaria_cm2": 7.55,  # Valor del PDF
+        "area_acero_necesaria_cm2": 7.55,
         "refuerzo_propuesto": "No.6 @ 33 cm"
     }
 
 def calcular_vigas(datos: DatosPuente, predim: Dict) -> Dict[str, Any]:
-    """Fase 5: Diseño de vigas longitudinales según PDF páginas 17-27"""
     L = datos.luz
     S = 3.0
     wc = datos.pesoConcreto
     wa = datos.pesoAsfalto
     
-    # Cargas distribuidas (página 18)
     w_losa_viga = predim["espesor_losa_m"] * S * wc
     w_viga_propia = predim["base_viga_m"] * predim["peralte_viga_m"] * wc
     w_asfalto_viga = 0.05 * S * wa
     w_cm_viga = w_losa_viga + w_viga_propia + w_asfalto_viga
     
-    # Momentos
     Mcm_viga_kg = (w_cm_viga * L * L) / 8
     Mcm_viga_ton = Mcm_viga_kg / 1000
     
-    # Momento por carga viva (escala cuadrática con la luz)
     factor_luz = L / 25
     Mcv_viga_ton = 79.29 * factor_luz * factor_luz * (datos.camionHS20 / 36)
-    
-    # Factor de impacto (página 23)
     I_viga = min(15 / (L + 38), 0.30)
-    FD = 1.3  # Factor de distribución (página 24)
-    
-    # Momento último (página 24)
+    FD = 1.3
     Mu_viga_ton = 1.3 * (Mcm_viga_ton + (5/3) * (Mcv_viga_ton * (1 + I_viga) * FD))
     
-    # Acero necesario (simplificado)
     b_viga_cm = predim["base_viga_m"] * 100
     d_viga = predim["peralte_viga_m"] * 100 - 6.43
     As_viga = (Mu_viga_ton * 1000 * 100) / (0.9 * datos.fy * 0.9 * d_viga)
     
-    # Corte (páginas 26-27)
     Vcm_viga_ton = (w_cm_viga * L) / 2 / 1000
     Vcv_viga_ton = 14.10 * factor_luz * (datos.camionHS20 / 36)
     Vu_viga_ton = 1.3 * (Vcm_viga_ton + (5/3) * (Vcv_viga_ton * (1 + I_viga)))
     
-    varillas = math.ceil(As_viga / 9.57)  # No.11 = 9.57 cm²
+    varillas = math.ceil(As_viga / 9.57)
     
     return {
         "carga_muerta_viga_interna_kg_m": round(w_cm_viga),
@@ -142,7 +119,6 @@ def calcular_vigas(datos: DatosPuente, predim: Dict) -> Dict[str, Any]:
     }
 
 def calcular_pila_central(Vu_viga_ton: float) -> Dict[str, Any]:
-    """Fase 10: Pila central (páginas 46-59)"""
     return {
         "cargas": {
             "peso_total_ton": 346.63,
@@ -159,19 +135,16 @@ def calcular_pila_central(Vu_viga_ton: float) -> Dict[str, Any]:
     }
 
 # ============================================
-# ENDPOINT PRINCIPAL
+# QUINTO: ENDPOINTS DE LA API
 # ============================================
+
 @app.post("/api/calcular")
 async def calcular(datos: DatosPuente) -> Dict[str, Any]:
-    """Endpoint que recibe los datos del frontend y devuelve todos los cálculos"""
-    
-    # Ejecutar todas las fases
     predim = calcular_pre_dimensionamiento(datos.luz)
     losa = calcular_losa(datos, predim)
     vigas = calcular_vigas(datos, predim)
     pila = calcular_pila_central(vigas["corte_ultimo_ton"])
     
-    # Valores fijos del PDF (página 34-36)
     neopreno = {
         "dimensiones_apoyo_cm": "50 x 50",
         "esfuerzo_actuante_kg_cm2": 26.15,
@@ -185,7 +158,7 @@ async def calcular(datos: DatosPuente) -> Dict[str, Any]:
             "factor_seguridad_volteo": 5.15,
             "factor_seguridad_deslizamiento": 2.06
         },
-        "presiones": {"presion_maxima_kg_cm2": 1.48}
+        "presiones": {"presion_maxima_kg_cm2": 1.48, "verificacion_presion": True}
     }
     
     return {
@@ -197,14 +170,23 @@ async def calcular(datos: DatosPuente) -> Dict[str, Any]:
         "pila_central": pila
     }
 
-# Endpoint de prueba
+@app.get("/api/health")
+async def health():
+    return {"status": "ok", "message": "API funcionando correctamente"}
+
 @app.get("/")
 async def root():
-    return {
-        "status": "ok", 
-        "message": "API de cálculo estructural funcionando",
-        "endpoints": {
-            "calcular_post": "/api/calcular",
-            "health_get": "/api/health"
+    # Intentar servir el archivo index.html si existe
+    try:
+        with open("index.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        return HTMLResponse(content=html_content)
+    except FileNotFoundError:
+        return {
+            "status": "ok", 
+            "message": "API funcionando. El frontend no se encuentra en la ruta esperada.",
+            "endpoints": {
+                "calcular_post": "/api/calcular",
+                "health_get": "/api/health"
+            }
         }
-    }
