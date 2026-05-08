@@ -1,13 +1,13 @@
 {
   "functions": {
-    "api/index.py": {
+    "api/calcular.py": {
       "runtime": "python3.12"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.py"
+      "source": "/api/(.*)",
+      "destination": "/api/calcular.py"
     }
   ]
 }
