@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoria de Cálculo - Puente 75m</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            font-size: 1.1rem;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f0f4f8;
+            border-bottom: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4a5568;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #2a5298;
+            border-bottom: 3px solid #2a5298;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .seccion {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .seccion h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .fila {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .fila label {
+            width: 280px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .fila input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .fila input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .btn-calcular {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-calcular:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .resultados {
+            margin-top: 30px;
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .resultados h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .output-area {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .resultado-seccion {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .resultado-seccion h4 {
+            color: #2a5298;
+            margin-bottom: 12px;
+        }
+
+        .resultado-seccion p {
+            margin: 8px 0;
+            color: #4a5568;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #c53030;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #2a5298;
+        }
+
+        .grid-valores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .valor-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .valor-card .label {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .valor-card .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2a5298;
+        }
+
+        @media (max-width: 768px) {
+            .fila label {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            .tab-btn {
+                font-size: 0.7rem;
+                padding: 10px;
+            }
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Memoria de Cálculo Interactiva</h1>
+            <p>Basado en AASHTO Standard Specifications | ACI 318-14</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="datos">Datos Generales</button>
+            <button class="tab-btn" data-tab="geometria">Geometría</button>
+            <button class="tab-btn" data-tab="cargas">Cargas</button>
+            <button class="tab-btn" data-tab="resultados">Resultados</button>
+        </div>
+
+        <div class="content">
+            <div class="tab-pane active" id="datos">
+                <div class="seccion">
+                    <h3>Datos del Proyecto</h3>
+                    <div class="fila">
+                        <label>Luz del puente (m):</label>
+                        <input type="number" id="luz" step="any" value="75">
+                    </div>
+                    <div class="fila">
+                        <label>Resistencia del concreto f'c (kg/cm²):</label>
+                        <input type="number" id="fc" step="any" value="281">
+                    </div>
+                    <div class="fila">
+                        <label>Fluencia del acero fy (kg/cm²):</label>
+                        <input type="number" id="fy" step="any" value="4200">
+                    </div>
+                    <div class="fila">
+                        <label>Peso volumétrico concreto (kg/m³):</label>
+                        <input type="number" id="pesoConcreto" step="any" value="2400">
+                    </div>
+                    <div class="fila">
+                        <label>Peso volumétrico asfalto (kg/m³):</label>
+                        <input type="number" id="pesoAsfalto" step="any" value="2100">
+                    </div>
+                    <div class="fila">
+                        <label>Camión HS20-44 (ton):</label>
+                        <input type="number" id="camionHS20" step="any" value="36">
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="geometria">
+                <div id="geometria-content" class="seccion">
+                    <h3>Resultados de Pre-dimensionamiento</h3>
+                    <p style="color: #718096; text-align: center; padding: 40px;">
+                        Ingrese los datos y presione "Calcular"
+                    </p>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="cargas">
+                <div id="cargas-content" class="seccion">
+                    <h3>Análisis de Cargas</h3>
+                    <p style="color: #718096; text-align: center; padding: 40px;">
+                        Ingrese los datos y presione "Calcular"
+                    </p>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="resultados">
+                <div class="resultados">
+                    <h3>Resultados del Cálculo Estructural</h3>
+                    <div id="output" class="output-area">
+                        <p style="color: #718096; text-align: center;">
+                            Ingrese los datos y presione "Calcular"
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="calcularBtn" class="btn-calcular">CALCULAR ESTRUCTURA COMPLETA</button>
+        </div>
+    </div>
+
+    <script>
+        // Manejo de tabs
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panes = document.querySelectorAll('.tab-pane');
+
+        tabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                tabs.forEach(b => b.classList.remove('active'));
+                panes.forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        function formatNumber(num, decimals = 2) {
+            if (num === undefined || num === null || isNaN(num)) return '0.00';
+            return num.toLocaleString('es-MX', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        document.getElementById('calcularBtn').addEventListener('click', function() {
+            const datos = {
+                luz: parseFloat(document.getElementById('luz').value),
+                fc: parseFloat(document.getElementById('fc').value),
+                fy: parseFloat(document.getElementById('fy').value),
+                pesoConcreto: parseFloat(document.getElementById('pesoConcreto').value),
+                pesoAsfalto: parseFloat(document.getElementById('pesoAsfalto').value),
+                camionHS20: parseFloat(document.getElementById('camionHS20').value)
+            };
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '<div class="loading">Calculando estructura del puente...</div>';
+            
+            document.getElementById('geometria-content').innerHTML = '<div class="loading">Calculando dimensiones...</div>';
+            document.getElementById('cargas-content').innerHTML = '<div class="loading">Calculando cargas...</div>';
+
+            fetch('/api/calcular', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Datos recibidos:', data);
+                
+                if (data.error) {
+                    outputDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                    return;
+                }
+                
+                // Pestaña Geometría
+                if (data.predimensionamiento) {
+                    const p = data.predimensionamiento;
+                    document.getElementById('geometria-content').innerHTML = `
+                        <h3>Dimensiones Calculadas</h3>
+                        <div class="grid-valores">
+                            <div class="valor-card">
+                                <div class="label">Espesor de losa</div>
+                                <div class="value">${formatNumber(p.espesor_losa_m)} m</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Peralte viga principal</div>
+                                <div class="value">${formatNumber(p.peralte_viga_m)} m</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Base de viga principal</div>
+                                <div class="value">${formatNumber(p.base_viga_m)} m</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Diafragma interior</div>
+                                <div class="value">${formatNumber(p.diafragma_int_alto_m)} m</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Diafragma exterior</div>
+                                <div class="value">${formatNumber(p.diafragma_ext_alto_m)} m</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Pestaña Cargas
+                if (data.losa && data.vigas) {
+                    document.getElementById('cargas-content').innerHTML = `
+                        <h3>Análisis de Cargas</h3>
+                        <div class="grid-valores">
+                            <div class="valor-card">
+                                <div class="label">Carga muerta losa</div>
+                                <div class="value">${formatNumber(data.losa.carga_muerta_kg_m)} kg/m</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Momento último losa</div>
+                                <div class="value">${formatNumber(data.losa.momento_ultimo_ton_m)} ton-m</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Refuerzo losa</div>
+                                <div class="value">${formatNumber(data.losa.area_acero_positivo_cm2)} cm²</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Momento último viga</div>
+                                <div class="value">${formatNumber(data.vigas.momento_ultimo_interior_ton_m)} ton-m</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Refuerzo viga principal</div>
+                                <div class="value">${formatNumber(data.vigas.area_acero_necesaria_cm2)} cm²</div>
+                            </div>
+                            <div class="valor-card">
+                                <div class="label">Corte último viga</div>
+                                <div class="value">${formatNumber(data.vigas.corte_ultimo_kg / 1000)} ton</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Resultados completos
+                let html = '';
+                
+                if (data.predimensionamiento) {
+                    html += `
+                        <div class="resultado-seccion">
+                            <h4>PRE-DIMENSIONAMIENTO</h4>
+                            <p>Espesor de losa: <strong>${formatNumber(data.predimensionamiento.espesor_losa_m)} m</strong></p>
+                            <p>Peralte viga principal: <strong>${formatNumber(data.predimensionamiento.peralte_viga_m)} m</strong></p>
+                            <p>Base viga principal: <strong>${formatNumber(data.predimensionamiento.base_viga_m)} m</strong></p>
+                            <p>Diafragma interior: ${formatNumber(data.predimensionamiento.diafragma_int_alto_m)} m</p>
+                            <p>Diafragma exterior: ${formatNumber(data.predimensionamiento.diafragma_ext_alto_m)} m</p>
+                        </div>
+                    `;
+                }
+                
+                if (data.losa) {
+                    html += `
+                        <div class="resultado-seccion">
+                            <h4>DISEÑO DE LOSA</h4>
+                            <p>Carga muerta: ${formatNumber(data.losa.carga_muerta_kg_m)} kg/m</p>
+                            <p>Momento por carga muerta: ${formatNumber(data.losa.momento_cm_kg_m)} kg-m</p>
+                            <p>Momento por carga viva: ${formatNumber(data.losa.momento_cv_kg_m)} kg-m</p>
+                            <p>Factor de impacto: ${formatNumber(data.losa.factor_impacto)}</p>
+                            <p>Momento último: <strong>${formatNumber(data.losa.momento_ultimo_ton_m)} ton-m</strong></p>
+                            <p>Área de acero necesaria: ${formatNumber(data.losa.area_acero_positivo_cm2)} cm²</p>
+                            <p><strong>Refuerzo propuesto:</strong> ${data.losa.refuerzo_propuesto}</p>
+                        </div>
+                    `;
+                }
+                
+                if (data.vigas) {
+                    html += `
+                        <div class="resultado-seccion">
+                            <h4>DISEÑO DE VIGAS</h4>
+                            <p>Carga muerta viga: ${formatNumber(data.vigas.carga_muerta_viga_interna_kg_m)} kg/m</p>
+                            <p>Momento carga muerta: ${formatNumber(data.vigas.momento_cm_ton_m)} ton-m</p>
+                            <p>Momento carga viva: ${formatNumber(data.vigas.momento_cv_ton_m)} ton-m</p>
+                            <p>Momento último: <strong>${formatNumber(data.vigas.momento_ultimo_interior_ton_m)} ton-m</strong></p>
+                            <p>Área de acero necesaria: ${formatNumber(data.vigas.area_acero_necesaria_cm2)} cm²</p>
+                            <p>Corte último: ${formatNumber(data.vigas.corte_ultimo_kg / 1000)} ton</p>
+                            <p><strong>Refuerzo longitudinal:</strong> ${data.vigas.refuerzo_propuesto}</p>
+                            <p><strong>Estribos:</strong> ${data.vigas.estribos_propuestos}</p>
+                        </div>
+                    `;
+                }
+                
+                if (data.neopreno) {
+                    html += `
+                        <div class="resultado-seccion">
+                            <h4>APOYOS DE NEOPRENO</h4>
+                            <p>Dimensiones: ${data.neopreno.dimensiones_apoyo_cm} cm</p>
+                            <p>Esfuerzo actuante: ${formatNumber(data.neopreno.esfuerzo_actuante_kg_cm2)} kg/cm²</p>
+                            <p>Desplazamiento máximo: ${formatNumber(data.neopreno.desplazamiento_maximo_cm)} cm</p>
+                            <p>Espesor total: ${formatNumber(data.neopreno.espesor_total_neopreno_cm)} cm</p>
+                            <p>Verificación: ${data.neopreno.verificacion_desplazamiento ? '✓ CUMPLE' : '✗ NO CUMPLE'}</p>
+                        </div>
+                    `;
+                }
+                
+                if (data.estribos) {
+                    html += `
+                        <div class="resultado-seccion">
+                            <h4>ESTRIBOS</h4>
+                            <p>FS Volteo: ${formatNumber(data.estribos.estabilidad.factor_seguridad_volteo)}</p>
+                            <p>FS Deslizamiento: ${formatNumber(data.estribos.estabilidad.factor_seguridad_deslizamiento)}</p>
+                            <p>Presión máxima: ${formatNumber(data.estribos.presiones.presion_maxima_kg_cm2)} kg/cm²</p>
+                            <p>${data.estribos.presiones.verificacion_presion ? '✓ Presión admisible CUMPLE' : '✗ No cumple'}</p>
+                        </div>
+                    `;
+                }
+                
+                if (data.pila_central) {
+                    html += `
+                        <div class="resultado-seccion">
+                            <h4>PILA CENTRAL</h4>
+                            <p>Peso total: ${formatNumber(data.pila_central.cargas.peso_total_ton)} ton</p>
+                            <p>Carga de vigas: ${formatNumber(data.pila_central.cargas.carga_vigas_ton)} ton</p>
+                            <p>FS Volteo: ${formatNumber(data.pila_central.estabilidad.factor_seguridad_volteo)}</p>
+                            <p>FS Deslizamiento: ${formatNumber(data.pila_central.estabilidad.factor_seguridad_deslizamiento)}</p>
+                            <p><strong>Refuerzo vertical:</strong> ${data.pila_central.refuerzo_propuesto.refuerzo_vertical}</p>
+                            <p><strong>Refuerzo horizontal:</strong> ${data.pila_central.refuerzo_propuesto.refuerzo_horizontal}</p>
+                        </div>
+                    `;
+                }
+                
+                outputDiv.innerHTML = html;
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                outputDiv.innerHTML = `<div class="error">❌ Error de conexión: ${err.message}</div>`;
+            });
+        });
+    </script>
+</body>
+</html>

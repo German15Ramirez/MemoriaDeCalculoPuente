@@ -1,0 +1,72 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+h1, h2, h3 {
+    color: #1e3c72;
+}
+
+.seccion {
+    background: #f9fafc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border-left: 6px solid #2c7da0;
+}
+
+.fila {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.fila label {
+    width: 220px;
+    font-weight: bold;
+    color: #0b3b5f;
+}
+
+.fila input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #bdd4e7;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+button {
+    background: #1e6f5c;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #0e4d3f;
+}
+
+.output-area {
+    background: #eef2f5;
+    padding: 20px;
+    border-radius: 12px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    border: 1px solid #cbd5e1;
+}
