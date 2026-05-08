@@ -253,21 +253,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Memoria de Cálculo Interactiva</h1>
+            <h1>📐 Memoria de Cálculo Interactiva</h1>
+            <h2>Puente Vehicular de 75m - Concreto Armado</h2>
             <p>Basado en AASHTO Standard Specifications | ACI 318-14</p>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" data-tab="datos">Datos Generales</button>
-            <button class="tab-btn" data-tab="geometria">Geometría</button>
-            <button class="tab-btn" data-tab="cargas">Cargas</button>
-            <button class="tab-btn" data-tab="resultados">Resultados</button>
+            <button class="tab-btn active" data-tab="datos">📊 Datos Generales</button>
+            <button class="tab-btn" data-tab="geometria">📏 Geometría</button>
+            <button class="tab-btn" data-tab="cargas">⚖️ Cargas</button>
+            <button class="tab-btn" data-tab="resultados">📈 Resultados</button>
         </div>
 
         <div class="content">
             <div class="tab-pane active" id="datos">
                 <div class="seccion">
-                    <h3>Datos del Proyecto</h3>
+                    <h3>📌 Datos del Proyecto</h3>
                     <div class="fila">
                         <label>Luz del puente (m):</label>
                         <input type="number" id="luz" step="any" value="75">
@@ -297,39 +298,38 @@
 
             <div class="tab-pane" id="geometria">
                 <div id="geometria-content" class="seccion">
-                    <h3>Resultados de Pre-dimensionamiento</h3>
+                    <h3>📏 Resultados de Pre-dimensionamiento</h3>
                     <p style="color: #718096; text-align: center; padding: 40px;">
-                        Ingrese los datos y presione "Calcular"
+                        ⚡ Ingrese los datos y presione "Calcular"
                     </p>
                 </div>
             </div>
 
             <div class="tab-pane" id="cargas">
                 <div id="cargas-content" class="seccion">
-                    <h3>Análisis de Cargas</h3>
+                    <h3>⚖️ Análisis de Cargas</h3>
                     <p style="color: #718096; text-align: center; padding: 40px;">
-                        Ingrese los datos y presione "Calcular"
+                        ⚡ Ingrese los datos y presione "Calcular"
                     </p>
                 </div>
             </div>
 
             <div class="tab-pane" id="resultados">
                 <div class="resultados">
-                    <h3>Resultados del Cálculo Estructural</h3>
+                    <h3>📊 Resultados del Cálculo Estructural</h3>
                     <div id="output" class="output-area">
                         <p style="color: #718096; text-align: center;">
-                            Ingrese los datos y presione "Calcular"
+                            ⚡ Ingrese los datos y presione "Calcular"
                         </p>
                     </div>
                 </div>
             </div>
 
-            <button id="calcularBtn" class="btn-calcular">CALCULAR ESTRUCTURA COMPLETA</button>
+            <button id="calcularBtn" class="btn-calcular">🔁 CALCULAR ESTRUCTURA COMPLETA</button>
         </div>
     </div>
 
     <script>
-        // Manejo de tabs
         const tabs = document.querySelectorAll('.tab-btn');
         const panes = document.querySelectorAll('.tab-pane');
 
@@ -362,10 +362,10 @@
             };
 
             const outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = '<div class="loading">Calculando estructura del puente...</div>';
+            outputDiv.innerHTML = '<div class="loading">⏳ Calculando estructura del puente...</div>';
             
-            document.getElementById('geometria-content').innerHTML = '<div class="loading">Calculando dimensiones...</div>';
-            document.getElementById('cargas-content').innerHTML = '<div class="loading">Calculando cargas...</div>';
+            document.getElementById('geometria-content').innerHTML = '<div class="loading">⏳ Calculando dimensiones...</div>';
+            document.getElementById('cargas-content').innerHTML = '<div class="loading">⏳ Calculando cargas...</div>';
 
             fetch('/api/calcular', {
                 method: 'POST',
@@ -385,7 +385,7 @@
                 if (data.predimensionamiento) {
                     const p = data.predimensionamiento;
                     document.getElementById('geometria-content').innerHTML = `
-                        <h3>Dimensiones Calculadas</h3>
+                        <h3>📏 Dimensiones Calculadas</h3>
                         <div class="grid-valores">
                             <div class="valor-card">
                                 <div class="label">Espesor de losa</div>
@@ -414,7 +414,7 @@
                 // Pestaña Cargas
                 if (data.losa && data.vigas) {
                     document.getElementById('cargas-content').innerHTML = `
-                        <h3>Análisis de Cargas</h3>
+                        <h3>⚖️ Análisis de Cargas</h3>
                         <div class="grid-valores">
                             <div class="valor-card">
                                 <div class="label">Carga muerta losa</div>
@@ -426,7 +426,7 @@
                             </div>
                             <div class="valor-card">
                                 <div class="label">Refuerzo losa</div>
-                                <div class="value">${formatNumber(data.losa.area_acero_positivo_cm2)} cm²</div>
+                                <div class="value">${formatNumber(data.losa.area_acero_necesaria_cm2)} cm²</div>
                             </div>
                             <div class="valor-card">
                                 <div class="label">Momento último viga</div>
@@ -438,7 +438,7 @@
                             </div>
                             <div class="valor-card">
                                 <div class="label">Corte último viga</div>
-                                <div class="value">${formatNumber(data.vigas.corte_ultimo_kg / 1000)} ton</div>
+                                <div class="value">${formatNumber(data.vigas.corte_ultimo_ton)} ton</div>
                             </div>
                         </div>
                     `;
@@ -450,12 +450,12 @@
                 if (data.predimensionamiento) {
                     html += `
                         <div class="resultado-seccion">
-                            <h4>PRE-DIMENSIONAMIENTO</h4>
-                            <p>Espesor de losa: <strong>${formatNumber(data.predimensionamiento.espesor_losa_m)} m</strong></p>
-                            <p>Peralte viga principal: <strong>${formatNumber(data.predimensionamiento.peralte_viga_m)} m</strong></p>
-                            <p>Base viga principal: <strong>${formatNumber(data.predimensionamiento.base_viga_m)} m</strong></p>
-                            <p>Diafragma interior: ${formatNumber(data.predimensionamiento.diafragma_int_alto_m)} m</p>
-                            <p>Diafragma exterior: ${formatNumber(data.predimensionamiento.diafragma_ext_alto_m)} m</p>
+                            <h4>📐 PRE-DIMENSIONAMIENTO</h4>
+                            <p>📏 Espesor de losa: <strong>${formatNumber(data.predimensionamiento.espesor_losa_m)} m</strong></p>
+                            <p>📏 Peralte viga principal: <strong>${formatNumber(data.predimensionamiento.peralte_viga_m)} m</strong></p>
+                            <p>📏 Base viga principal: <strong>${formatNumber(data.predimensionamiento.base_viga_m)} m</strong></p>
+                            <p>📏 Diafragma interior: ${formatNumber(data.predimensionamiento.diafragma_int_alto_m)} m</p>
+                            <p>📏 Diafragma exterior: ${formatNumber(data.predimensionamiento.diafragma_ext_alto_m)} m</p>
                         </div>
                     `;
                 }
@@ -463,14 +463,14 @@
                 if (data.losa) {
                     html += `
                         <div class="resultado-seccion">
-                            <h4>DISEÑO DE LOSA</h4>
-                            <p>Carga muerta: ${formatNumber(data.losa.carga_muerta_kg_m)} kg/m</p>
-                            <p>Momento por carga muerta: ${formatNumber(data.losa.momento_cm_kg_m)} kg-m</p>
-                            <p>Momento por carga viva: ${formatNumber(data.losa.momento_cv_kg_m)} kg-m</p>
-                            <p>Factor de impacto: ${formatNumber(data.losa.factor_impacto)}</p>
-                            <p>Momento último: <strong>${formatNumber(data.losa.momento_ultimo_ton_m)} ton-m</strong></p>
-                            <p>Área de acero necesaria: ${formatNumber(data.losa.area_acero_positivo_cm2)} cm²</p>
-                            <p><strong>Refuerzo propuesto:</strong> ${data.losa.refuerzo_propuesto}</p>
+                            <h4>🏗️ DISEÑO DE LOSA</h4>
+                            <p>📊 Carga muerta: ${formatNumber(data.losa.carga_muerta_kg_m)} kg/m</p>
+                            <p>📊 Momento por carga muerta: ${formatNumber(data.losa.momento_cm_kg_m)} kg-m</p>
+                            <p>📊 Momento por carga viva: ${formatNumber(data.losa.momento_cv_kg_m)} kg-m</p>
+                            <p>📊 Factor de impacto: ${formatNumber(data.losa.factor_impacto)}</p>
+                            <p>📊 Momento último: <strong>${formatNumber(data.losa.momento_ultimo_ton_m)} ton-m</strong></p>
+                            <p>📊 Área de acero necesaria: ${formatNumber(data.losa.area_acero_necesaria_cm2)} cm²</p>
+                            <p>✅ <strong>Refuerzo propuesto:</strong> ${data.losa.refuerzo_propuesto}</p>
                         </div>
                     `;
                 }
@@ -478,15 +478,15 @@
                 if (data.vigas) {
                     html += `
                         <div class="resultado-seccion">
-                            <h4>DISEÑO DE VIGAS</h4>
-                            <p>Carga muerta viga: ${formatNumber(data.vigas.carga_muerta_viga_interna_kg_m)} kg/m</p>
-                            <p>Momento carga muerta: ${formatNumber(data.vigas.momento_cm_ton_m)} ton-m</p>
-                            <p>Momento carga viva: ${formatNumber(data.vigas.momento_cv_ton_m)} ton-m</p>
-                            <p>Momento último: <strong>${formatNumber(data.vigas.momento_ultimo_interior_ton_m)} ton-m</strong></p>
-                            <p>Área de acero necesaria: ${formatNumber(data.vigas.area_acero_necesaria_cm2)} cm²</p>
-                            <p>Corte último: ${formatNumber(data.vigas.corte_ultimo_kg / 1000)} ton</p>
-                            <p><strong>Refuerzo longitudinal:</strong> ${data.vigas.refuerzo_propuesto}</p>
-                            <p><strong>Estribos:</strong> ${data.vigas.estribos_propuestos}</p>
+                            <h4>🏗️ DISEÑO DE VIGAS</h4>
+                            <p>📊 Carga muerta viga: ${formatNumber(data.vigas.carga_muerta_viga_interna_kg_m)} kg/m</p>
+                            <p>📊 Momento carga muerta: ${formatNumber(data.vigas.momento_cm_ton_m)} ton-m</p>
+                            <p>📊 Momento carga viva: ${formatNumber(data.vigas.momento_cv_ton_m)} ton-m</p>
+                            <p>📊 Momento último: <strong>${formatNumber(data.vigas.momento_ultimo_interior_ton_m)} ton-m</strong></p>
+                            <p>📊 Área de acero necesaria: ${formatNumber(data.vigas.area_acero_necesaria_cm2)} cm²</p>
+                            <p>📊 Corte último: ${formatNumber(data.vigas.corte_ultimo_ton)} ton</p>
+                            <p>✅ <strong>Refuerzo longitudinal:</strong> ${data.vigas.refuerzo_propuesto}</p>
+                            <p>✅ <strong>Estribos:</strong> ${data.vigas.estribos_propuestos}</p>
                         </div>
                     `;
                 }
@@ -494,12 +494,12 @@
                 if (data.neopreno) {
                     html += `
                         <div class="resultado-seccion">
-                            <h4>APOYOS DE NEOPRENO</h4>
-                            <p>Dimensiones: ${data.neopreno.dimensiones_apoyo_cm} cm</p>
-                            <p>Esfuerzo actuante: ${formatNumber(data.neopreno.esfuerzo_actuante_kg_cm2)} kg/cm²</p>
-                            <p>Desplazamiento máximo: ${formatNumber(data.neopreno.desplazamiento_maximo_cm)} cm</p>
-                            <p>Espesor total: ${formatNumber(data.neopreno.espesor_total_neopreno_cm)} cm</p>
-                            <p>Verificación: ${data.neopreno.verificacion_desplazamiento ? '✓ CUMPLE' : '✗ NO CUMPLE'}</p>
+                            <h4>🛠️ APOYOS DE NEOPRENO</h4>
+                            <p>📏 Dimensiones: ${data.neopreno.dimensiones_apoyo_cm} cm</p>
+                            <p>📊 Esfuerzo actuante: ${formatNumber(data.neopreno.esfuerzo_actuante_kg_cm2)} kg/cm²</p>
+                            <p>📊 Desplazamiento máximo: ${formatNumber(data.neopreno.desplazamiento_maximo_cm)} cm</p>
+                            <p>📊 Espesor total: ${formatNumber(data.neopreno.espesor_total_neopreno_cm)} cm</p>
+                            <p>✅ Verificación: ${data.neopreno.verificacion_desplazamiento ? '✓ CUMPLE' : '✗ NO CUMPLE'}</p>
                         </div>
                     `;
                 }
@@ -507,11 +507,11 @@
                 if (data.estribos) {
                     html += `
                         <div class="resultado-seccion">
-                            <h4>ESTRIBOS</h4>
-                            <p>FS Volteo: ${formatNumber(data.estribos.estabilidad.factor_seguridad_volteo)}</p>
-                            <p>FS Deslizamiento: ${formatNumber(data.estribos.estabilidad.factor_seguridad_deslizamiento)}</p>
-                            <p>Presión máxima: ${formatNumber(data.estribos.presiones.presion_maxima_kg_cm2)} kg/cm²</p>
-                            <p>${data.estribos.presiones.verificacion_presion ? '✓ Presión admisible CUMPLE' : '✗ No cumple'}</p>
+                            <h4>🏔️ ESTRIBOS</h4>
+                            <p>📊 FS Volteo: ${formatNumber(data.estribos.estabilidad.factor_seguridad_volteo)}</p>
+                            <p>📊 FS Deslizamiento: ${formatNumber(data.estribos.estabilidad.factor_seguridad_deslizamiento)}</p>
+                            <p>📊 Presión máxima: ${formatNumber(data.estribos.presiones.presion_maxima_kg_cm2)} kg/cm²</p>
+                            <p>✅ ${data.estribos.presiones.verificacion_presion ? '✓ Presión admisible CUMPLE' : '✗ No cumple'}</p>
                         </div>
                     `;
                 }
@@ -519,13 +519,13 @@
                 if (data.pila_central) {
                     html += `
                         <div class="resultado-seccion">
-                            <h4>PILA CENTRAL</h4>
-                            <p>Peso total: ${formatNumber(data.pila_central.cargas.peso_total_ton)} ton</p>
-                            <p>Carga de vigas: ${formatNumber(data.pila_central.cargas.carga_vigas_ton)} ton</p>
-                            <p>FS Volteo: ${formatNumber(data.pila_central.estabilidad.factor_seguridad_volteo)}</p>
-                            <p>FS Deslizamiento: ${formatNumber(data.pila_central.estabilidad.factor_seguridad_deslizamiento)}</p>
-                            <p><strong>Refuerzo vertical:</strong> ${data.pila_central.refuerzo_propuesto.refuerzo_vertical}</p>
-                            <p><strong>Refuerzo horizontal:</strong> ${data.pila_central.refuerzo_propuesto.refuerzo_horizontal}</p>
+                            <h4>🏛️ PILA CENTRAL</h4>
+                            <p>📊 Peso total: ${formatNumber(data.pila_central.cargas.peso_total_ton)} ton</p>
+                            <p>📊 Carga de vigas: ${formatNumber(data.pila_central.cargas.carga_vigas_ton)} ton</p>
+                            <p>📊 FS Volteo: ${formatNumber(data.pila_central.estabilidad.factor_seguridad_volteo)}</p>
+                            <p>📊 FS Deslizamiento: ${formatNumber(data.pila_central.estabilidad.factor_seguridad_deslizamiento)}</p>
+                            <p>✅ <strong>Refuerzo vertical:</strong> ${data.pila_central.refuerzo_propuesto.refuerzo_vertical}</p>
+                            <p>✅ <strong>Refuerzo horizontal:</strong> ${data.pila_central.refuerzo_propuesto.refuerzo_horizontal}</p>
                         </div>
                     `;
                 }

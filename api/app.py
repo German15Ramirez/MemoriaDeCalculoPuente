@@ -188,6 +188,13 @@ async def calcular(datos: DatosPuente) -> Dict[str, Any]:
     }
 
 # Endpoint de prueba
-@app.get("/api/health")
-async def health():
-    return {"status": "ok", "message": "API funcionando correctamente"}
+@app.get("/")
+async def root():
+    return {
+        "status": "ok", 
+        "message": "API de cálculo estructural funcionando",
+        "endpoints": {
+            "calcular_post": "/api/calcular",
+            "health_get": "/api/health"
+        }
+    }
