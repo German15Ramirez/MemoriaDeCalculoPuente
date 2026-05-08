@@ -4,6 +4,16 @@ from pydantic import BaseModel
 from typing import Dict, Any
 import math
 
+# Para servir index.html en la raíz
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    try:
+        with open("index.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        return HTMLResponse(content=html_content)
+    except FileNotFoundError:
+        return {"error": "index.html no encontrado"}
+
 # ============================================
 # MODELO DE DATOS DE ENTRADA
 # ============================================
