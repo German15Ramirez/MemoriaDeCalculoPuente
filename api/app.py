@@ -54,22 +54,35 @@ def calcular_pre_dimensionamiento(L: float) -> Dict[str, Any]:
     }
 
 def calcular_losa(datos: DatosPuente, predim: Dict) -> Dict[str, Any]:
-    S = 3.0
+    S = 3.0 
+    voladizo = 1.22 
+    
     w_losa = predim["espesor_losa_m"] * 1.0 * datos.pesoConcreto
     w_asfalto = 0.05 * 1.0 * datos.pesoAsfalto
     w_barandal = 40
     w_cm_losa = w_losa + w_asfalto + w_barandal
     
-    Mcm_losa = 562.50
-    Mcv_losa = 658.78 * (datos.camionHS20 / 36)
-    I_losa = 0.30
-    Mu_losa = 1.3 * (Mcm_losa + (5/3) * (Mcv_losa * (1 + I_losa)))
+    Mcm_voladizo = (w_cm_losa * voladizo**2) / 2
+    Mcm_tramo = (w_cm_losa * S**2) / 10
+    Mcm_losa = max(Mcm_voladizo, Mcm_tramo)
+    
+    S_pies = S * 3.28084
+    P_lb = 16060 
+    Mcv_lb_pie = (0.8 * (S_pies + 2) / 32) * P_lb
+    Mcv_losa = Mcv_lb_pie * 0.1383 
+    
+    I_losa = min(15.24 / (S + 38), 0.30)
+    
+    Mu_losa = 1.3 * (Mcm_losa + (5/3) * (Mcv_losa * (1 + I_losa))) 
+    
+    FL = 2.2 / math.sqrt(S_pies)
+    FL = min(FL, 0.67)  
     
     return {
         "carga_muerta_kg_m": round(w_cm_losa),
-        "momento_cm_kg_m": Mcm_losa,
+        "momento_cm_kg_m": round(Mcm_losa),
         "momento_cv_kg_m": round(Mcv_losa),
-        "factor_impacto": I_losa,
+        "factor_impacto": round(I_losa, 2),
         "momento_ultimo_kg_m": round(Mu_losa),
         "momento_ultimo_ton_m": round(Mu_losa / 1000, 2),
         "area_acero_necesaria_cm2": 7.55,
@@ -91,9 +104,12 @@ def calcular_vigas(datos: DatosPuente, predim: Dict) -> Dict[str, Any]:
     Mcm_viga_ton = Mcm_viga_kg / 1000
     
     factor_luz = L / 25
-    Mcv_viga_ton = 79.29 * factor_luz * factor_luz * (datos.camionHS20 / 36)
+    Mcv_base = 79.29
+    Mcv_viga_ton = Mcv_base * factor_luz**2 * (datos.camionHS20 / 36)
+    
     I_viga = min(15 / (L + 38), 0.30)
-    FD = 1.3
+    FD = 1.3 
+    
     Mu_viga_ton = 1.3 * (Mcm_viga_ton + (5/3) * (Mcv_viga_ton * (1 + I_viga) * FD))
     
     b_viga_cm = predim["base_viga_m"] * 100
@@ -101,7 +117,8 @@ def calcular_vigas(datos: DatosPuente, predim: Dict) -> Dict[str, Any]:
     As_viga = (Mu_viga_ton * 1000 * 100) / (0.9 * datos.fy * 0.9 * d_viga)
     
     Vcm_viga_ton = (w_cm_viga * L) / 2 / 1000
-    Vcv_viga_ton = 14.10 * factor_luz * (datos.camionHS20 / 36)
+    Vcv_base = 14.10 
+    Vcv_viga_ton = Vcv_base * factor_luz * (datos.camionHS20 / 36)
     Vu_viga_ton = 1.3 * (Vcm_viga_ton + (5/3) * (Vcv_viga_ton * (1 + I_viga)))
     
     varillas = math.ceil(As_viga / 9.57)
@@ -176,7 +193,6 @@ async def health():
 
 @app.get("/")
 async def root():
-    # Intentar servir el archivo index.html si existe
     try:
         with open("index.html", "r", encoding="utf-8") as f:
             html_content = f.read()
